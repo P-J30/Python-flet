@@ -1,4 +1,5 @@
 import flet as ft
+import re
 
 def main(page: ft.Page):
     page.title = "เครื่องคิดเลข"
@@ -12,8 +13,11 @@ def main(page: ft.Page):
             try:
                 # แก้ไขการแทนที่เครื่องหมายเพื่อให้ eval() ทำงานได้
                 expression = current_value.replace("×", "*").replace("÷", "/")
+                expression = expression.replace("^", "**")
+                # เปลี่ยน % เป็น /100 (รองรับกรณี 50% หรือ 50+10%)
+                expression = re.sub(r"(\d+)%", r"(\1/100)", expression)
                 result.value = str(eval(expression))
-            except (SyntaxError, ZeroDivisionError):
+            except (SyntaxError, ZeroDivisionError, Exception):
                 result.value = "Error"
         elif button_text == "C":
             result.value = ""
@@ -33,6 +37,7 @@ def main(page: ft.Page):
 
     # สร้างปุ่มสำหรับตัวเลขและเครื่องหมาย
     buttons = [
+        ["(", ")", "%", "^"],
         ["7", "8", "9", "÷"],
         ["4", "5", "6", "×"],
         ["1", "2", "3", "-"],
